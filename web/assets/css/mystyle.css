@@ -1,0 +1,28 @@
+
+.my-header-bg{
+    background-color: #fdfdfd !important;
+    
+}
+.my-header-bg .logo h1{
+    color: #032B63  !important;
+    
+}
+
+.services .icon-box {
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    margin: 0 0 40px 0;
+    background: #fff;
+    box-shadow: 0 10px 29px 0 rgba(68, 88, 144, 0.1);
+    transition: all 0.3s ease-in-out;
+    border-radius: 42px;
+    text-align: center;
+    border-bottom: 3px solid #fff;
+}
+
+
+
+.register-btn{
+    margin-right: -25px !important;
+}

@@ -15,9 +15,9 @@ include_once '../init.php';
                 <?php
                 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     extract($_POST);
-                    $item_id = dataClean($item_id);
-                    $qty = dataClean($qty);
-                    $unit_price = dataClean($unit_price);
+                    //$item_id = dataClean($item_id);
+                    // $qty = dataClean($qty);
+                    // $unit_price = dataClean($unit_price);
                     $purchase_date = dataClean($purchase_date);
                     $supplier_id = dataClean($supplier_id);
 
@@ -31,8 +31,12 @@ include_once '../init.php';
                     }
                     if (empty($message)) {
                         $db = dbConn();
-                        $sql = "INSERT INTO `item_stock`(`item_id`,`qty`,`unit_price`,`purchase_date`,`supplier_id`) VALUES ('$item_id','$qty','$unit_price','$purchase_date','$supplier_id')";
-                        $db->query($sql);
+                        foreach ($item_id as $key => $value) {
+                            $q = $qty[$key];
+                            $price = $unit_price[$key];
+                            $sql = "INSERT INTO `item_stock`(`item_id`,`qty`,`unit_price`,`purchase_date`,`supplier_id`) VALUES ('$value','$q','$price','$purchase_date','$supplier_id')";
+                            $db->query($sql);
+                        }
                     }
                 }
                 ?>
@@ -60,34 +64,51 @@ include_once '../init.php';
                         <label for="purchase_date">Purchase Date:</label>
                         <input type="date" name="purchase_date" id="purchase_date" class="form-control" required value="<?= @$purchase_date ?>">
                     </div>
-                    <div class="form-group">
-                        <label for="item_id">Item Name:</label>
-                        <select name="item_id" id="item_id" class="form-control" required>
-                            <option value="">--</option>
-                            <?php
-                            $db = dbConn();
-                            $sql = "SELECT id, item_name FROM items";
-                            $result = $db->query($sql);
-                            if ($result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                            ?>
-                                    <option value="<?= $row['id'] ?>"><?= $row['item_name'] ?></option>
-                            <?php
-                                }
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="qty">Quantity:</label>
-                        <input type="number" name="qty" id="qty" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="unit_price">Unit Price:</label>
-                        <input type="text" name="unit_price" id="unit_price" class="form-control" required>
-                    </div>
 
-
+                    <table class="table table-striped" id="items">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="items-row">
+                                <td>
+                                    <select name="item_id[]" id="item_id" class="form-control select2" required>
+                                        <option value="">--</option>
+                                        <?php
+                                        $db = dbConn();
+                                        $sql = "SELECT id, item_name FROM items";
+                                        $result = $db->query($sql);
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_assoc()) {
+                                        ?>
+                                                <option value="<?= $row['id'] ?>"><?= $row['item_name'] ?></option>
+                                        <?php
+                                            }
+                                        }
+                                        ?>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="qty[]" id="qty" class="form-control" required>
+                                </td>
+                                <td>
+                                    <input type="text" name="unit_price[]" id="unit_price" class="form-control" required>
+                                </td>
+                                <td>
+                                    <button class="removeBtn" type="button" class="btn btn-primary">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" id="addBtn" class="btn btn-warning">Add Item</button>
+                    <br>
+                    <br>
+                    <br>
                     <input type="submit" value="Submit" class="btn btn-primary">
                 </form>
 
@@ -101,3 +122,31 @@ include_once '../init.php';
 $content = ob_get_clean();
 include '../layouts.php';
 ?>
+<script>
+    $(document).ready(function() {
+        function addItems() {
+            var tableBody = $('#items tbody');
+            var newRow = tableBody.find('.items-row').first().clone();
+
+            // Clear input values in the cloned row
+            newRow.find('input').val('');
+            // newRow.find('.select2-container').remove();
+            //newRow.find('select').removeClass('select2-hidden-accessible').removeAttr('data-select2-id tabindex aria-hidden');
+            //newRow.find('select').select2();
+            // Append the cloned row to the table body
+            tableBody.append(newRow);
+        }
+
+        function removeItems(button) {
+            var row = $(button).closest('tr');
+            row.remove();
+        }
+        $('#addBtn').click(addItems);
+        $('#items').on('click', '.removeBtn', function() {
+            removeItems(this);
+        });
+
+        //Initialize Select2 Elements
+        $('.select2').select2();
+    });
+</script>
